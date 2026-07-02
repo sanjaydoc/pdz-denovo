@@ -1,0 +1,37 @@
+# =============================================================================
+# Multi-objective optimization (proposes next DBTL library)
+# =============================================================================
+name: multi_objective
+
+method: qnehvi                 # qnehvi (BoTorch) | nsga2 (genetic algorithm)
+
+# Objectives (all framed as "maximize"); signs handled in code.
+objectives:
+  - name: stability
+    direction: maximize
+    weight: 1.0
+  - name: binding
+    direction: maximize        # we negate docking energy so higher = better
+    weight: 1.0
+  - name: solubility
+    direction: maximize
+    weight: 1.0
+
+# Reference point for hypervolume (set adaptively if null)
+ref_point: null
+
+# BoTorch (qNEHVI) settings
+botorch:
+  n_restarts: 8
+  raw_samples: 128
+  mc_samples: 64
+
+# Genetic algorithm (NSGA-II) settings
+genetic:
+  population_size: 64
+  n_generations: 20
+  mutation_rate: 0.05
+  crossover_rate: 0.7
+
+# Search space embedding
+embedding: esm2                # latent space used by the surrogate/optimizer

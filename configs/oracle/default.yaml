@@ -1,0 +1,30 @@
+# =============================================================================
+# Simulated wet-lab oracle stack (modular)
+# =============================================================================
+
+# --- Stability / foldability ---
+stability:
+  method: esm2_pll             # esm2_pll (default, fits 6 GB) | esmfold (heavy)
+  esm_model: esm2_t12_35M_UR50D   # small model for 6 GB VRAM
+  # Higher pseudo-log-likelihood => more "native-like"/stable proxy
+  normalize: true
+
+# --- Binding affinity ---
+binding:
+  method: smina                # smina docking (CPU) | contact_score (fallback)
+  smina_exe: bin/smina.exe     # resolved relative to project root
+  exhaustiveness: 8
+  n_poses: 5
+  box_padding: 8.0             # angstroms around target pocket
+
+# --- Solubility / aggregation ---
+solubility:
+  method: seq_features         # lightweight sequence-based proxy
+  # weights combine hydrophobicity, net charge, aggregation-prone motifs
+  hydrophobicity_weight: 1.0
+  charge_weight: 0.5
+  aggregation_weight: 1.0
+
+# Oracle-level settings
+cache: true                    # cache scored candidates on disk
+cache_dir: outputs/oracle_cache

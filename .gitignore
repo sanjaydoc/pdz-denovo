@@ -1,0 +1,45 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# --- Virtual env ---
+.venv/
+venv/
+env/
+
+# --- Data / model artifacts (large, regenerated) ---
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+*.pdb
+*.cif
+*.pt
+*.ckpt
+*.pkl
+
+# --- Outputs / logs ---
+outputs/
+mlruns/
+*.log
+wandb/
+
+# --- Caches ---
+.cache/
+.pytest_cache/
+.ruff_cache/
+torch_hub/
+*.egg
+
+# --- Editor / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Notebooks ---
+.ipynb_checkpoints/

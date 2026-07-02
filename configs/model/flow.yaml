@@ -1,0 +1,32 @@
+# =============================================================================
+# SE(3)-equivariant flow-matching generator (backbone generation)
+# Tuned small for 6 GB VRAM.
+# =============================================================================
+name: se3_flow_matching
+
+# Backbone representation
+representation: ca_frames      # ca | ca_frames | backbone_atoms
+max_residues: 80
+
+# EGNN-style equivariant network
+hidden_dim: 128
+n_layers: 5
+edge_dim: 32
+n_neighbors: 16                # kNN graph for locality (memory saver)
+
+# Flow matching
+sigma_min: 0.001
+time_embed_dim: 32
+prediction: velocity           # velocity (flow matching) | score
+
+# Training
+batch_size: 4                  # small for 6 GB VRAM
+lr: 0.0002
+weight_decay: 0.00001
+epochs: 200
+grad_checkpoint: true
+mixed_precision: true          # fp16 autocast
+grad_clip: 1.0
+
+# Sampling
+n_ode_steps: 100

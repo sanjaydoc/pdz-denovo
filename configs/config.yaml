@@ -1,0 +1,41 @@
+# =============================================================================
+# Master Hydra config for pdz-denovo
+# =============================================================================
+defaults:
+  - model: flow
+  - oracle: default
+  - optimize: moo
+  - _self_
+
+project:
+  name: pdz-denovo
+  seed: 42
+  device: auto          # auto | cuda | cpu
+
+paths:
+  data_raw: data/raw
+  data_processed: data/processed
+  outputs: outputs
+  mlruns: mlruns
+
+target:
+  name: PSD95_PDZ3
+  pdb_id: 1BE9          # PSD-95 PDZ3 domain (classic reference structure)
+  chain: A
+  # Residue range of the PDZ3 domain within 1BE9 (approx; refined in data prep)
+  res_start: 302
+  res_end: 402
+
+design:
+  min_length: 40        # miniprotein binder length bounds (fits 6 GB VRAM)
+  max_length: 80
+
+dbtl:
+  n_cycles: 5
+  library_size: 32      # candidates proposed per cycle
+  n_seed: 16            # initial random/seed designs
+
+logging:
+  level: INFO
+  use_mlflow: true
+  local_json: true

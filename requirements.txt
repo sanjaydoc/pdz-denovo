@@ -1,0 +1,47 @@
+# ---------------------------------------------------------------------------
+# Core requirements for pdz-denovo (Python 3.10, Windows, 6 GB VRAM)
+#
+# NOTE: PyTorch (CUDA build) is installed separately by scripts/setup_env.ps1
+#       using the cu121 index URL, because it is not on the default PyPI index
+#       in the CUDA-enabled form. Do not add torch here.
+# ---------------------------------------------------------------------------
+
+# --- Config / orchestration ---
+hydra-core==1.3.2
+omegaconf==2.3.0
+
+# --- Scientific / numerics ---
+numpy==1.26.4
+scipy==1.11.4
+pandas==2.1.4
+scikit-learn==1.3.2
+
+# --- Protein / structure handling ---
+biotite==0.39.0
+biopython==1.83
+fair-esm==2.0.0
+
+# --- Optimization ---
+botorch==0.9.5
+gpytorch==1.11
+
+# --- Experiment tracking (fully open-source) ---
+mlflow==2.9.2
+
+# --- Dashboard / viz ---
+streamlit==1.30.0
+plotly==5.18.0
+matplotlib==3.8.2
+py3Dmol==2.0.4
+
+# --- Utilities ---
+tqdm==4.66.1
+requests==2.31.0
+rich==13.7.0
+
+# --- Dev / testing ---
+pytest==7.4.4
+pytest-cov==4.1.0
+pre-commit==3.6.0
+black==23.12.1
+ruff==0.1.11

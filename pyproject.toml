@@ -26,5 +26,8 @@ ignore = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+addopts = "-q -m 'not esm'"
+markers = [
+    "esm: tests that load ESM-2 weights (heavy; run with `pytest -m esm`)",
+]
 filterwarnings = ["ignore::DeprecationWarning"]

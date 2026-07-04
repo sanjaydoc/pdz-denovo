@@ -74,8 +74,10 @@ class ESMFoldBackend:
         self,
         method: str = "api",
         api_url: str = ESMFOLD_API_URL,
-        timeout: int = 120,
+        timeout: int = 180,
         chunk_size: int | None = 128,
+        max_retries: int = 4,
+        backoff: float = 4.0,
     ) -> None:
         if method not in ("api", "local"):
             raise ValueError("method must be 'api' or 'local'")
@@ -83,21 +85,42 @@ class ESMFoldBackend:
         self.api_url = api_url
         self.timeout = timeout
         self.chunk_size = chunk_size
+        self.max_retries = max_retries
+        self.backoff = backoff
         self._model = None  # lazy local model
 
     # --- API backend ---------------------------------------------------------
     def _fold_api(self, sequence: str) -> str:
+        import time
+
         import requests
 
-        resp = requests.post(
-            self.api_url, data=sequence, timeout=self.timeout,
-            headers={"Content-Type": "text/plain"},
+        sequence = sequence.strip()
+        last_error = "unknown"
+        for attempt in range(self.max_retries):
+            try:
+                resp = requests.post(
+                    self.api_url, data=sequence, timeout=self.timeout,
+                    headers={"Content-Type": "text/plain"},
+                )
+                if resp.status_code == 200 and resp.text.startswith(
+                    ("HEADER", "ATOM", "MODEL")
+                ):
+                    return resp.text
+                last_error = f"HTTP {resp.status_code}: {resp.text[:150]}"
+            except requests.exceptions.RequestException as exc:
+                last_error = str(exc)
+            # The public server frequently 504s / cold-starts; back off and retry.
+            if attempt < self.max_retries - 1:
+                wait = self.backoff * (2**attempt)
+                LOGGER.warning(
+                    "ESMFold API attempt %d/%d failed (%s); retrying in %.0fs ...",
+                    attempt + 1, self.max_retries, last_error, wait,
+                )
+                time.sleep(wait)
+        raise RuntimeError(
+            f"ESMFold API failed after {self.max_retries} attempts: {last_error}"
         )
-        if resp.status_code != 200 or not resp.text.startswith(("HEADER", "ATOM", "MODEL")):
-            raise RuntimeError(
-                f"ESMFold API failed (HTTP {resp.status_code}): {resp.text[:200]}"
-            )
-        return resp.text
 
     # --- local backend -------------------------------------------------------
     def _ensure_local(self) -> None:

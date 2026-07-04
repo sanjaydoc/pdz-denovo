@@ -64,7 +64,13 @@ def parse_fold_pdb(pdb_text: str):
             plddt.append(b)
     if not coords:
         raise ValueError("No Cα atoms found in predicted PDB.")
-    return np.asarray(coords, dtype="float32"), np.asarray(plddt, dtype="float32")
+    plddt = np.asarray(plddt, dtype="float32")
+    # The esmatlas API stores pLDDT on a 0-1 scale in the B-factor column, while
+    # local ESMFold uses 0-100. Normalise to the conventional 0-100 so the same
+    # success threshold (pLDDT > 70) applies to both backends.
+    if plddt.size and float(plddt.max()) <= 1.0:
+        plddt = plddt * 100.0
+    return np.asarray(coords, dtype="float32"), plddt
 
 
 class ESMFoldBackend:

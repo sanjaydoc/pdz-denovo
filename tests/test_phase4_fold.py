@@ -69,6 +69,13 @@ def test_parse_fold_pdb_raises_without_ca():
         parse_fold_pdb("HEADER only\nEND\n")
 
 
+def test_parse_fold_pdb_rescales_0_to_1_plddt():
+    # esmatlas returns pLDDT on a 0-1 scale; it must be normalised to 0-100.
+    coords = [(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)]
+    _, b = parse_fold_pdb(_fake_pred_pdb(coords, [0.32, 0.93]))
+    assert np.allclose(b, [32.0, 93.0])
+
+
 # --- fake fold backend --------------------------------------------------------
 
 

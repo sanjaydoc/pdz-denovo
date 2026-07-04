@@ -81,7 +81,7 @@ def build_seed_fn(args):
 
     from pdz_denovo.generative.flow import build_flow_model
     from pdz_denovo.generative.sample import coords_to_pdb
-    from pdz_denovo.sequence import ProteinMPNNDesigner
+    from pdz_denovo.sequence import FallbackDesigner, ProteinMPNNDesigner
 
     ckpt = torch.load(args.checkpoint, map_location="cpu")
     model = build_flow_model(OmegaConf.create(ckpt["flow_cfg"]))
@@ -94,8 +94,22 @@ def build_seed_fn(args):
         coords = model.sample(n_samples=n, length=args.length, n_steps=100)
         seeds = []
         for i in range(n):
-            pdb = coords_to_pdb(coords[i].cpu(), tmp_dir / f"seed_{i:03d}.pdb")
-            seeds.extend(designer.design(pdb_path=pdb, n_seqs=1, backbone_id=f"seed_{i:03d}"))
+            c = coords[i]
+            # A small ODE sampler occasionally emits a degenerate backbone
+            # (non-finite or collapsed coords) that crashes ProteinMPNN's native
+            # code. Skip those, and skip any single design that still fails, so
+            # one bad backbone never aborts the whole campaign.
+            if not torch.isfinite(c).all() or float(c.std()) < 1e-3:
+                LOGGER.warning("Skipping degenerate backbone seed_%03d.", i)
+                continue
+            pdb = coords_to_pdb(c.cpu(), tmp_dir / f"seed_{i:03d}.pdb")
+            try:
+                seeds.extend(designer.design(pdb_path=pdb, n_seqs=1, backbone_id=f"seed_{i:03d}"))
+            except Exception as exc:  # noqa: BLE001
+                LOGGER.warning("ProteinMPNN failed on seed_%03d (%s); skipping.", i, exc)
+        if not seeds:
+            LOGGER.warning("No generative seeds succeeded; falling back to random seeds.")
+            seeds = FallbackDesigner(seed=args.seed).design(length=args.length, n_seqs=n)
         return seeds
 
     return seed_fn

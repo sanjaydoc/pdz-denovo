@@ -121,7 +121,7 @@ NSGA-II reaching the best front:
 |-----------|----------------|------:|
 | random (baseline) | 5.70 → 5.91 | 5.91 |
 | **NSGA-II** | 5.70 → 6.18 | **6.18** |
-| qNEHVI (BoTorch) | 5.70 → 5.95 | 5.95 |
+| qNEHVI (BoTorch) | 5.70 → 6.01 | 6.01 |
 
 Reproduce with `python scripts/benchmark_optimizers.py`. At this small scale
 (cheap proxy oracle, ~130 evaluations) a genetic algorithm competes with

@@ -102,18 +102,19 @@ Hypervolume by cycle for each optimizer against a random-search baseline
 | cycle | random | NSGA-II | qNEHVI |
 |------:|-------:|--------:|-------:|
 | 0 | 5.697 | 5.697 | 5.697 |
-| 1 | 5.753 | 5.963 | 5.884 |
-| 2 | 5.772 | 6.102 | 5.887 |
-| 3 | 5.817 | 6.122 | 5.944 |
-| 4 | 5.909 | 6.161 | 5.950 |
-| 5 | **5.910** | **6.184** | **5.952** |
+| 1 | 5.753 | 5.963 | 5.869 |
+| 2 | 5.772 | 6.102 | 5.935 |
+| 3 | 5.817 | 6.122 | 5.987 |
+| 4 | 5.909 | 6.161 | 6.007 |
+| 5 | **5.910** | **6.184** | **6.012** |
 
 **Both optimizers beat random search, and NSGA-II reaches the highest
 hypervolume.** Two notes worth making:
 
 - The GP surrogate is fed **normalized** ESM-2 features (`Normalize` input
   transform); without it BoTorch warns the inputs aren't unit-cube-scaled and the
-  surrogate is poorly conditioned.
+  surrogate is poorly conditioned. Adding the transform raised qNEHVI's final
+  hypervolume from 5.95 to 6.01 in this run.
 - At this scale — a *cheap* proxy oracle, ~130 evaluations, 320-dim features — a
   genetic algorithm matching or beating Bayesian optimization is expected. **BO's
   advantage emerges with expensive evaluations and a tight query budget** (few

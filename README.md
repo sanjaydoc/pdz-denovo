@@ -91,8 +91,11 @@ pdz-denovo/
   PDZ class-I motif prior, emitting oracle-ready `Candidate`s. A torch-free
   fallback designer keeps the loop/tests runnable before ProteinMPNN is cloned.
   - Set up once: `python scripts/download_proteinmpnn.py`
-- Phase 4 — ESMFold self-consistency validation — next.
-- Phase 5 — DBTL loop + multi-objective optimization — planned.
+- **Phase 4 — ESMFold self-consistency validation** ✅ refold designs (API-first
+  ESMFold) and score **scRMSD** + **pLDDT** vs the designed backbone; end-to-end
+  `scripts/validate_designs.py` chains generator → ProteinMPNN → ESMFold.
+  - `python scripts/validate_designs.py --n-backbones 2 --n-seqs 4`
+- Phase 5 — DBTL loop + multi-objective optimization — next.
 - Phase 6 — Dashboard + report — planned.
 
 See [`docs/PLAN.md`](docs/PLAN.md) for the full roadmap and hardware budget.

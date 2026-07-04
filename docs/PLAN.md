@@ -37,7 +37,7 @@ models (AlphaFold/physics-based docking).
 | 1 | `oracle/` | ✅ done | ESM-2 stability (pseudo-log-likelihood) + biophysical solubility + PDZ class-I binding, combined `OracleStack` with disk caching |
 | 2 | `generative/` | ✅ done | SE(3)-equivariant **EGNN velocity field** + **conditional flow matching** over Cα coords; ODE sampler; equivariance test suite |
 | 3 | `sequence/` | ✅ done | Inverse folding — **ProteinMPNN** (Cα-only) assigns sequences to backbones, PDZ class-I motif grafted as a domain prior; oracle-ready `Candidate`s + torch-free fallback designer |
-| 4 | `fold/` | ⏳ planned | **ESMFold self-consistency**: design → ProteinMPNN → refold → **scRMSD** + **pLDDT/pTM**. Top-K per cycle only |
+| 4 | `fold/` | ✅ done | **ESMFold self-consistency** (API-first, local fallback): design → ProteinMPNN → refold → **scRMSD** + **pLDDT**; numpy Kabsch; `scripts/validate_designs.py` runs the full Design→Build→Test chain |
 | 5 | `loop/`, `optimize/`, `tracking/` | ⏳ planned | DBTL orchestrator + **BoTorch qNEHVI** multi-objective BO (NSGA-II fallback) over an ESM-2 latent surrogate; MLflow tracking |
 | 6 | `app/`, `notebooks/` | ⏳ planned | Live Streamlit (trajectories, Pareto front, py3Dmol gallery) + benchmark/ablation report (BO vs random vs GA) |
 

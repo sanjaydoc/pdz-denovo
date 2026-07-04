@@ -43,3 +43,6 @@ Thumbs.db
 
 # --- Notebooks ---
 .ipynb_checkpoints/
+
+# Vendored external code (cloned, not redistributed)
+third_party/

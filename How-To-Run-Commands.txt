@@ -1,0 +1,133 @@
+==============================================================================
+ PDZ De Novo — How To Run (Windows / cmd)
+==============================================================================
+ All commands assume you are in the project root:
+     cd "C:\Users\ADMIN\Desktop\All Apps\pdz-denovo"
+ and that the virtual environment is ACTIVATED (see step 1). Every new terminal
+ starts without the venv — activate it first or you'll get
+ "'python'/'streamlit' is not recognized".
+==============================================================================
+
+
+------------------------------------------------------------------------------
+0. ONE-TIME SETUP  (only needed once per machine)
+------------------------------------------------------------------------------
+REM Create the environment + install CUDA PyTorch + all requirements
+powershell -ExecutionPolicy Bypass -File scripts\setup_env.ps1
+
+REM MLflow 2.9 needs pkg_resources, removed by setuptools >= 81 -> pin it
+pip install "setuptools<81"
+
+REM Clone ProteinMPNN (with Ca weights) for sequence design
+python scripts\download_proteinmpnn.py
+
+REM Sanity-check the GPU is visible
+python scripts\verify_torch.py
+REM expect:  CUDA available: True | Quadro RTX 3000
+
+
+------------------------------------------------------------------------------
+1. ACTIVATE THE ENVIRONMENT  (every new terminal)
+------------------------------------------------------------------------------
+.venv\Scripts\activate.bat
+REM prompt should change to  (.venv) C:\...>
+
+
+------------------------------------------------------------------------------
+2. RUN THE TESTS
+------------------------------------------------------------------------------
+python -m pytest -q
+REM ~60 tests; heavy ESM test is skipped by default (run it with: pytest -m esm)
+
+
+------------------------------------------------------------------------------
+3. DOWNLOAD TRAINING DATA  (short protein backbones for the generator)
+------------------------------------------------------------------------------
+REM Default: query RCSB for ~80 single-chain proteins, length 64-128
+python scripts\download_training_data.py
+
+REM Options:
+python scripts\download_training_data.py --count 150          REM more structures
+python scripts\download_training_data.py --source list        REM curated fallback list
+
+
+------------------------------------------------------------------------------
+4. TRAIN THE SE(3) FLOW-MATCHING GENERATOR
+------------------------------------------------------------------------------
+REM Real training on the downloaded backbones (~30-45 min on the RTX 3000)
+python scripts\train_generator.py --data-dir data\processed\train --length 64 --epochs 150
+
+REM Quick smoke test (no data / no GPU needed):
+python scripts\train_generator.py --synthetic --epochs 5
+REM -> saves outputs\generator\model.pt
+
+
+------------------------------------------------------------------------------
+5. VALIDATE DESIGNS  (generator -> ProteinMPNN -> ESMFold self-consistency)
+------------------------------------------------------------------------------
+python scripts\validate_designs.py --n-backbones 4 --n-seqs 6
+REM Uses the ESMFold public API (no token, no local VRAM). Prints scRMSD / pLDDT
+REM and writes outputs\validation\validation.json + PDBs for the dashboard gallery.
+
+REM Skip ProteinMPNN (random sequences, for a quick plumbing check):
+python scripts\validate_designs.py --use-fallback-designer
+
+
+------------------------------------------------------------------------------
+6. RUN THE DBTL CLOSED LOOP  (the core deliverable)
+------------------------------------------------------------------------------
+REM Fast: random+motif seed, NSGA-II, 3-objective oracle
+python scripts\run_cycle.py --n-cycles 5 --library-size 32 --n-seed 16
+
+REM Bayesian optimization instead of the genetic algorithm
+python scripts\run_cycle.py --optimizer qnehvi
+
+REM Full "Design" stage: seed from the trained generator + ProteinMPNN
+python scripts\run_cycle.py --seed-source generative --n-cycles 5
+REM -> writes outputs\dbtl\history.json + pareto.json, logs to MLflow
+
+
+------------------------------------------------------------------------------
+7. BENCHMARK THE OPTIMIZERS  (NSGA-II vs qNEHVI vs random)
+------------------------------------------------------------------------------
+python scripts\benchmark_optimizers.py --n-cycles 6
+REM -> outputs\benchmark\benchmark.json + benchmark.png
+
+
+------------------------------------------------------------------------------
+8. LAUNCH THE DASHBOARD  (the thing to demo)
+------------------------------------------------------------------------------
+streamlit run app\streamlit_app.py
+REM opens http://localhost:8501  (Ctrl-C to stop; use a separate terminal for
+REM other commands). Refresh the tab after producing new outputs.
+
+
+------------------------------------------------------------------------------
+9. MLFLOW UI  (optional — browse experiment history)
+------------------------------------------------------------------------------
+mlflow ui
+REM opens http://localhost:5000  (optional; the Streamlit dashboard already
+REM visualizes results from the JSON outputs)
+
+
+------------------------------------------------------------------------------
+TYPICAL END-TO-END SESSION (after one-time setup)
+------------------------------------------------------------------------------
+.venv\Scripts\activate.bat
+python scripts\download_training_data.py
+python scripts\train_generator.py --data-dir data\processed\train --length 64 --epochs 150
+python scripts\validate_designs.py --n-backbones 4 --n-seqs 6
+python scripts\run_cycle.py --n-cycles 5 --library-size 32 --n-seed 16
+python scripts\benchmark_optimizers.py --n-cycles 6
+streamlit run app\streamlit_app.py
+
+
+------------------------------------------------------------------------------
+NOTES / GOTCHAS
+------------------------------------------------------------------------------
+- "not recognized as a command"  -> the venv isn't activated (step 1).
+- ProteinMPNN / ESM-2 weights download once on first use.
+- ESMFold API can be slow / 504 under load; it retries automatically.
+- Generative seeding skips occasional degenerate backbones automatically.
+- The oracles are simulated proxies (see docs\REPORT.md), not validated assays.
+==============================================================================

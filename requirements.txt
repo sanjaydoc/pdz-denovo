@@ -6,6 +6,11 @@
 #       in the CUDA-enabled form. Do not add torch here.
 # ---------------------------------------------------------------------------
 
+# --- Build/runtime tooling ---
+# MLflow 2.9.x imports pkg_resources, which setuptools >= 81 removed. Pin below
+# that so `import mlflow` works.
+setuptools<81
+
 # --- Config / orchestration ---
 hydra-core==1.3.2
 omegaconf==2.3.0

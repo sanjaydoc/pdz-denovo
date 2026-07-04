@@ -23,6 +23,7 @@ from __future__ import annotations
 import logging
 import random
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -77,7 +78,10 @@ class ProteinMPNNDesigner:
         self.repo_dir = Path(repo_dir)
         self.run_py = self.repo_dir / "protein_mpnn_run.py"
         self.ca_only = ca_only
-        self.python_exe = python_exe or "python"
+        # Default to the *current* interpreter so ProteinMPNN runs in the same
+        # (venv) environment as us — a bare "python" can resolve to a different
+        # system Python that lacks numpy/torch.
+        self.python_exe = python_exe or sys.executable
         self.model_name = model_name
         # Pass the weights folder explicitly. ProteinMPNN's own auto-detection
         # uses rfind("/"), which is broken on Windows (backslash paths) and

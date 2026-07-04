@@ -157,6 +157,35 @@ def test_dbtl_loop_runs_and_hypervolume_is_monotonic():
     assert len(result["pareto"]) >= 1
 
 
+class _DuplicatingOptimizer:
+    """Always re-proposes the same fixed library (forces archive collisions)."""
+
+    def __init__(self, seqs):
+        from pdz_denovo.oracle.types import Candidate
+
+        self._seqs = seqs
+        self._Candidate = Candidate
+
+    def propose(self, population, scores, n):
+        return [self._Candidate(sequence=s, origin="dup") for s in self._seqs[:n]]
+
+
+def test_dbtl_archive_and_pareto_are_unique_by_sequence():
+    seqs = ["ACDEFGHIKLTSV", "MNPQRSTVWYTSV", "ACDEFGHIKLTSV"]  # note the repeat
+    loop = DBTLoop(
+        scorer=_mock_scorer,
+        optimizer=_DuplicatingOptimizer(seqs),
+        seed_fn=lambda n: _DuplicatingOptimizer(seqs).propose(None, None, n),
+        ref_point=[0.0, 0.0, 0.0],
+    )
+    result = loop.run(n_cycles=4, library_size=3, n_seed=3)
+    archive_seqs = [c.sequence for c, _ in result["archive"]]
+    pareto_seqs = [c.sequence for c, _ in result["pareto"]]
+    # Despite re-proposing duplicates every cycle, each sequence appears once.
+    assert len(archive_seqs) == len(set(archive_seqs))
+    assert len(pareto_seqs) == len(set(pareto_seqs))
+
+
 def test_run_tracker_writes_json(tmp_path):
     tracker = RunTracker(out_dir=tmp_path, use_mlflow=False)
     tracker.log_cycle({"cycle": 0, "hypervolume": 1.0, "best_per_objective": [0.1, 0.2, 0.3]})

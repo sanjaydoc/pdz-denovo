@@ -56,13 +56,20 @@ class DBTLoop:
     def run(self, n_cycles: int = 5, library_size: int = 32, n_seed: int = 16) -> dict:
         """Run the DBTL loop and return history, archive, and final Pareto set."""
         population = self.seed_fn(n_seed)
-        archive: list[tuple] = []  # (Candidate, score_vector)
+        archive: list[tuple] = []  # (Candidate, score_vector), unique by sequence
+        seen: set = set()  # sequences already in the archive
         history: list[dict] = []
 
         for cycle in range(n_cycles):
             scores = self.scorer(population)
             for cand, vec in zip(population, scores):
                 cand.metadata["objectives"] = list(vec)
+                # The same sequence can be re-proposed across cycles (elites,
+                # repeated mutants); keep the archive unique so the Pareto front
+                # and metrics never double-count a design.
+                if cand.sequence in seen:
+                    continue
+                seen.add(cand.sequence)
                 archive.append((cand, list(vec)))
 
             arch_scores = [v for _, v in archive]

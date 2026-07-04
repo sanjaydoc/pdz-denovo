@@ -9,7 +9,7 @@ description = "Closed-loop de novo design of PSD-95 PDZ-domain binders via SE(3)
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "Sanjay" }]
+authors = [{ name = "Dr. Sanjay Anbu" }]
 
 [tool.setuptools.packages.find]
 where = ["src"]

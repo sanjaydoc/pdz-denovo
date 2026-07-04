@@ -1,5 +1,7 @@
 # PDZ De Novo — Closed-Loop Protein Binder Design
 
+**Author:** Dr. Sanjay Anbu
+
 A fully open-source **Design–Build–Test–Learn (DBTL)** platform for de novo design of
 miniprotein binders against the **PSD-95 PDZ domain** (a central synaptic scaffolding
 protein relevant to neural signaling and brain-computer interface tooling).

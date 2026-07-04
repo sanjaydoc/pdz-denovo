@@ -34,7 +34,7 @@ def test_random_optimizer_ignores_scores():
     assert [c.sequence for c in a] == [c.sequence for c in b]
 
 
-def test_training_data_default_ids_are_reasonable():
+def _load_training_data_module():
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
@@ -42,10 +42,29 @@ def test_training_data_default_ids_are_reasonable():
     )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
-    ids = mod.DEFAULT_PDB_IDS
+    return mod
+
+
+def test_training_data_default_ids_are_reasonable():
+    ids = _load_training_data_module().DEFAULT_PDB_IDS
     assert len(ids) >= 20
     assert all(len(pid) == 4 for pid in ids)  # valid PDB id format
     assert len(set(ids)) == len(ids)  # no duplicates
+
+
+def test_rcsb_query_builder_encodes_length_window():
+    mod = _load_training_data_module()
+    q = mod.build_rcsb_query(min_len=64, max_len=128, count=80)
+    assert q["return_type"] == "entry"
+    assert q["request_options"]["paginate"]["rows"] == 80
+    # The length-range node must carry our window.
+    nodes = q["query"]["nodes"]
+    length_node = next(
+        n for n in nodes
+        if n["parameters"]["attribute"] == "entity_poly.rcsb_sample_sequence_length"
+    )
+    assert length_node["parameters"]["value"]["from"] == 64
+    assert length_node["parameters"]["value"]["to"] == 128
 
 
 def test_report_and_plan_exist():

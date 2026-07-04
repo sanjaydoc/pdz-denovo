@@ -51,6 +51,7 @@ class QNEHVISelector:
             )
             from botorch.models import SingleTaskGP
             from botorch.models.model_list_gp_regression import ModelListGP
+            from botorch.models.transforms.input import Normalize
             from botorch.models.transforms.outcome import Standardize
             from botorch.optim import optimize_acqf_discrete
             from botorch.sampling.normal import SobolQMCNormalSampler
@@ -67,9 +68,18 @@ class QNEHVISelector:
         Y = torch.as_tensor(train_Y, dtype=torch.double)
         pool = torch.as_tensor(pool_X, dtype=torch.double)
 
-        # One independent GP per objective (all maximization).
+        # One independent GP per objective (all maximization). Normalize the
+        # (high-dim ESM) features to the unit cube and standardize outcomes, so
+        # the GP length scales are well conditioned — without this the surrogate
+        # sees raw embeddings and warns "input not in unit cube".
+        d = X.shape[-1]
         models = [
-            SingleTaskGP(X, Y[:, k : k + 1], outcome_transform=Standardize(m=1))
+            SingleTaskGP(
+                X,
+                Y[:, k : k + 1],
+                input_transform=Normalize(d=d),
+                outcome_transform=Standardize(m=1),
+            )
             for k in range(Y.shape[-1])
         ]
         model = ModelListGP(*models)

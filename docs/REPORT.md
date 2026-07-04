@@ -92,8 +92,33 @@ A representative 5-cycle run (random seed, NSGA-II, library 32):
 | 4 | 144 | 17 | 0.0284 | −0.504 | 0.865 |
 
 **Hypervolume rises monotonically** and the Pareto front grows — the loop is
-learning and proposing better libraries. `scripts/benchmark_optimizers.py`
-compares NSGA-II and qNEHVI against a random-search baseline on the same metric.
+learning and proposing better libraries.
+
+### Optimizer benchmark (representative 6-cycle run, identical seed + oracle)
+
+Hypervolume by cycle for each optimizer against a random-search baseline
+(`scripts/benchmark_optimizers.py`):
+
+| cycle | random | NSGA-II | qNEHVI |
+|------:|-------:|--------:|-------:|
+| 0 | 5.697 | 5.697 | 5.697 |
+| 1 | 5.753 | 5.963 | 5.884 |
+| 2 | 5.772 | 6.102 | 5.887 |
+| 3 | 5.817 | 6.122 | 5.944 |
+| 4 | 5.909 | 6.161 | 5.950 |
+| 5 | **5.910** | **6.184** | **5.952** |
+
+**Both optimizers beat random search, and NSGA-II reaches the highest
+hypervolume.** Two notes worth making:
+
+- The GP surrogate is fed **normalized** ESM-2 features (`Normalize` input
+  transform); without it BoTorch warns the inputs aren't unit-cube-scaled and the
+  surrogate is poorly conditioned.
+- At this scale — a *cheap* proxy oracle, ~130 evaluations, 320-dim features — a
+  genetic algorithm matching or beating Bayesian optimization is expected. **BO's
+  advantage emerges with expensive evaluations and a tight query budget** (few
+  hundred assays), which is precisely the regime a real DBTL campaign operates in.
+  The platform supports both so the right tool can be chosen per campaign.
 
 Observation: because the class-I motif is grafted onto every candidate, the
 **binding objective saturates** near its maximum — it stops being the active

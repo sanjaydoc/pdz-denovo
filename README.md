@@ -110,3 +110,20 @@ pdz-denovo/
 
 **All six phases complete.** See [`docs/REPORT.md`](docs/REPORT.md) for the technical
 report and [`docs/PLAN.md`](docs/PLAN.md) for the roadmap and hardware budget.
+
+## Results
+
+A representative closed-loop run improves the Pareto front every cycle, and both
+optimizers beat a random-search baseline on hypervolume (higher = better),
+NSGA-II reaching the best front:
+
+| optimizer | HV cycle 0 → 5 | final |
+|-----------|----------------|------:|
+| random (baseline) | 5.70 → 5.91 | 5.91 |
+| **NSGA-II** | 5.70 → 6.18 | **6.18** |
+| qNEHVI (BoTorch) | 5.70 → 5.95 | 5.95 |
+
+Reproduce with `python scripts/benchmark_optimizers.py`. At this small scale
+(cheap proxy oracle, ~130 evaluations) a genetic algorithm competes with
+Bayesian optimization; BO's advantage grows with expensive evaluations and tight
+query budgets. See [`docs/REPORT.md`](docs/REPORT.md) for discussion.

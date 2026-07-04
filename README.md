@@ -17,6 +17,35 @@ The system:
    (BoTorch qNEHVI or a genetic algorithm) over a Pareto front.
 5. **Reports** progress in a **Streamlit** dashboard.
 
+## How it works
+
+You give it a target, and it repeatedly **generates → scores → improves** protein
+candidates over several rounds — so instead of testing millions of designs in a
+lab, you get a short list of the most promising ones automatically. Each round
+gets better because the optimizer learns from the previous round's scores.
+
+```mermaid
+flowchart TD
+    A([Target: PSD-95 PDZ domain, 1BE9]) --> B
+
+    subgraph LOOP [DBTL loop -- repeats each cycle]
+        direction TB
+        B["1. DESIGN<br/>SE(3) flow model invents backbone shapes<br/>ProteinMPNN assigns the amino-acid sequence"]
+        C["2. TEST -- in silico oracle<br/>Stability - stays folded?<br/>Solubility - dissolves?<br/>Binding - sticks to the target?"]
+        D["3. LEARN<br/>Optimizer (NSGA-II / qNEHVI) finds the best<br/>trade-offs and proposes a smarter next batch"]
+        B --> C --> D
+    end
+
+    D --> E{Good enough?}
+    E -- No --> B
+    E -- Yes --> F([Results:<br/>Pareto-optimal designs,<br/>dashboard + report,<br/>ESMFold self-consistency check])
+```
+
+**In one sentence:** an automatic protein designer that invents candidate
+binders, scores them, and iteratively improves them — a working miniature of a
+closed-loop molecular-discovery platform. Swap the target and the same machine
+designs a different molecule.
+
 ## Why this target?
 
 PSD-95 PDZ domains organize the post-synaptic density and are fundamental to synaptic

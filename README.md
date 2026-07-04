@@ -80,4 +80,16 @@ pdz-denovo/
 
 ## Status
 
-Phase 0 (scaffold + data) — in progress. See milestone plan in project notes.
+- **Phase 0 — Scaffold + data** ✅ Hydra configs, RCSB download, env setup, utils, tests.
+- **Phase 1 — Simulated wet-lab oracle** ✅ ESM-2 stability + solubility + PDZ class-I
+  binding, combined `OracleStack` with disk caching.
+- **Phase 2 — SE(3) flow-matching generator** ✅ EGNN velocity field + conditional
+  flow matching over Cα coordinates, with an equivariance test suite.
+  - Smoke test (no GPU/data): `python scripts/train_generator.py --synthetic --epochs 5`
+  - Real run: `python scripts/train_generator.py --data-dir data/processed --epochs 100`
+- Phase 3 — Sequence design (inverse folding) — next.
+- Phase 4 — ESMFold self-consistency validation — planned.
+- Phase 5 — DBTL loop + multi-objective optimization — planned.
+- Phase 6 — Dashboard + report — planned.
+
+See [`docs/PLAN.md`](docs/PLAN.md) for the full roadmap and hardware budget.

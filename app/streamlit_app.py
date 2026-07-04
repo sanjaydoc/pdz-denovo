@@ -41,12 +41,13 @@ st.info(
 
 st.subheader("Pipeline status")
 phases = {
-    "Phase 0 — Scaffold + data": "in progress",
-    "Phase 1 — Oracle stack": "pending",
-    "Phase 2 — SE(3) flow generator": "pending",
-    "Phase 3 — DBTL loop": "pending",
-    "Phase 4 — Multi-objective optimization": "pending",
-    "Phase 5 — Dashboard + report": "pending",
+    "Phase 0 — Scaffold + data": "done",
+    "Phase 1 — Oracle stack (ESM-2 + solubility + PDZ binding)": "done",
+    "Phase 2 — SE(3) flow-matching generator": "done",
+    "Phase 3 — Sequence design (inverse folding)": "pending",
+    "Phase 4 — ESMFold self-consistency validation": "pending",
+    "Phase 5 — DBTL loop + multi-objective optimization": "pending",
+    "Phase 6 — Dashboard + report": "pending",
 }
 for name, status in phases.items():
     st.write(f"- **{name}** — {status}")

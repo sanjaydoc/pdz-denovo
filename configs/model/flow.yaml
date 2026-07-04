@@ -5,8 +5,11 @@
 name: se3_flow_matching
 
 # Backbone representation
-representation: ca_frames      # ca | ca_frames | backbone_atoms
+# Phase 2 implements `ca` (Cα-coordinate flow matching with an EGNN velocity
+# field). `ca_frames` (full SE(3) frames / IPA) is a planned extension.
+representation: ca            # ca (implemented) | ca_frames | backbone_atoms
 max_residues: 80
+crop_length: 64               # fixed-length training crop (<= max_residues)
 
 # EGNN-style equivariant network
 hidden_dim: 128
@@ -18,6 +21,7 @@ n_neighbors: 16                # kNN graph for locality (memory saver)
 sigma_min: 0.001
 time_embed_dim: 32
 prediction: velocity           # velocity (flow matching) | score
+coord_scale: 10.0              # divide Cα Å by this so data ~ unit variance (matches N(0,I) noise)
 
 # Training
 batch_size: 4                  # small for 6 GB VRAM

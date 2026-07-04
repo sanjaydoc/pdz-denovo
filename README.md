@@ -95,7 +95,11 @@ pdz-denovo/
   ESMFold) and score **scRMSD** + **pLDDT** vs the designed backbone; end-to-end
   `scripts/validate_designs.py` chains generator → ProteinMPNN → ESMFold.
   - `python scripts/validate_designs.py --n-backbones 2 --n-seqs 4`
-- Phase 5 — DBTL loop + multi-objective optimization — next.
-- Phase 6 — Dashboard + report — planned.
+- **Phase 5 — DBTL loop + multi-objective optimization** ✅ closed loop (seed →
+  oracle → optimizer → repeat) with **NSGA-II** and **BoTorch qNEHVI** optimizers,
+  Pareto/hypervolume tracking, and MLflow+JSON logging.
+  - `python scripts/run_cycle.py --n-cycles 5 --library-size 32 --n-seed 16`
+  - Bayesian option: `python scripts/run_cycle.py --optimizer qnehvi`
+- Phase 6 — Dashboard + report — next.
 
 See [`docs/PLAN.md`](docs/PLAN.md) for the full roadmap and hardware budget.

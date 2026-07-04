@@ -100,6 +100,13 @@ pdz-denovo/
   Pareto/hypervolume tracking, and MLflow+JSON logging.
   - `python scripts/run_cycle.py --n-cycles 5 --library-size 32 --n-seed 16`
   - Bayesian option: `python scripts/run_cycle.py --optimizer qnehvi`
-- Phase 6 — Dashboard + report — next.
+- **Phase 6 — Dashboard + report** ✅ Streamlit dashboard (hypervolume trajectory,
+  interactive Pareto front, optimizer benchmark, py3Dmol structure gallery),
+  optimizer benchmark vs random search, technical report, and a training-data
+  download pipeline.
+  - Dashboard: `streamlit run app/streamlit_app.py`
+  - Benchmark: `python scripts/benchmark_optimizers.py`
+  - Training data: `python scripts/download_training_data.py`
 
-See [`docs/PLAN.md`](docs/PLAN.md) for the full roadmap and hardware budget.
+**All six phases complete.** See [`docs/REPORT.md`](docs/REPORT.md) for the technical
+report and [`docs/PLAN.md`](docs/PLAN.md) for the roadmap and hardware budget.

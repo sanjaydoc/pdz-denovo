@@ -144,6 +144,21 @@ def main() -> int:
     )
 
     pareto = result["pareto"]
+    # Persist the Pareto set (id, sequence, objectives) for the dashboard.
+    import json
+
+    pareto_records = [
+        {
+            "id": cand.id,
+            "sequence": cand.sequence,
+            "origin": cand.origin,
+            "stability": vec[0],
+            "solubility": vec[1],
+            "binding": vec[2],
+        }
+        for cand, vec in pareto
+    ]
+    (Path(args.out) / "pareto.json").write_text(json.dumps(pareto_records, indent=2))
     LOGGER.info("Done. Final Pareto set: %d designs.", len(pareto))
     for cand, vec in sorted(pareto, key=lambda cv: -cv[1][2])[:10]:
         LOGGER.info(

@@ -12,9 +12,11 @@ from pdz_denovo.optimize.pareto import (
     non_dominated_sort,
     pareto_front_indices,
 )
+from pdz_denovo.optimize.random_baseline import RandomOptimizer
 
 __all__ = [
     "NSGA2Optimizer",
+    "RandomOptimizer",
     "dominates",
     "non_dominated_sort",
     "pareto_front_indices",

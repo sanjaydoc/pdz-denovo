@@ -39,7 +39,7 @@ models (AlphaFold/physics-based docking).
 | 3 | `sequence/` | ✅ done | Inverse folding — **ProteinMPNN** (Cα-only) assigns sequences to backbones, PDZ class-I motif grafted as a domain prior; oracle-ready `Candidate`s + torch-free fallback designer |
 | 4 | `fold/` | ✅ done | **ESMFold self-consistency** (API-first, local fallback): design → ProteinMPNN → refold → **scRMSD** + **pLDDT**; numpy Kabsch; `scripts/validate_designs.py` runs the full Design→Build→Test chain |
 | 5 | `loop/`, `optimize/`, `tracking/` | ✅ done | DBTL orchestrator (component-agnostic) + **NSGA-II** and **BoTorch qNEHVI** (ESM-2-feature GP surrogate) optimizers; Pareto/hypervolume progress; MLflow+JSON tracking; `scripts/run_cycle.py` |
-| 6 | `app/`, `notebooks/` | ⏳ planned | Live Streamlit (trajectories, Pareto front, py3Dmol gallery) + benchmark/ablation report (BO vs random vs GA) |
+| 6 | `app/`, `docs/`, `scripts/` | ✅ done | Streamlit dashboard (hypervolume, interactive Pareto, benchmark, py3Dmol gallery) + optimizer benchmark vs random + `docs/REPORT.md` + training-data download pipeline |
 
 ## Phase 2 detail (implemented)
 

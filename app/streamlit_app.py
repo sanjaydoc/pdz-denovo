@@ -44,7 +44,7 @@ phases = {
     "Phase 0 — Scaffold + data": "done",
     "Phase 1 — Oracle stack (ESM-2 + solubility + PDZ binding)": "done",
     "Phase 2 — SE(3) flow-matching generator": "done",
-    "Phase 3 — Sequence design (inverse folding)": "pending",
+    "Phase 3 — Sequence design (ProteinMPNN inverse folding)": "done",
     "Phase 4 — ESMFold self-consistency validation": "pending",
     "Phase 5 — DBTL loop + multi-objective optimization": "pending",
     "Phase 6 — Dashboard + report": "pending",

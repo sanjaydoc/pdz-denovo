@@ -87,8 +87,11 @@ pdz-denovo/
   flow matching over Cα coordinates, with an equivariance test suite.
   - Smoke test (no GPU/data): `python scripts/train_generator.py --synthetic --epochs 5`
   - Real run: `python scripts/train_generator.py --data-dir data/processed --epochs 100`
-- Phase 3 — Sequence design (inverse folding) — next.
-- Phase 4 — ESMFold self-consistency validation — planned.
+- **Phase 3 — Sequence design (inverse folding)** ✅ ProteinMPNN Cα-only wrapper +
+  PDZ class-I motif prior, emitting oracle-ready `Candidate`s. A torch-free
+  fallback designer keeps the loop/tests runnable before ProteinMPNN is cloned.
+  - Set up once: `python scripts/download_proteinmpnn.py`
+- Phase 4 — ESMFold self-consistency validation — next.
 - Phase 5 — DBTL loop + multi-objective optimization — planned.
 - Phase 6 — Dashboard + report — planned.
 

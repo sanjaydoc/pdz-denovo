@@ -71,11 +71,22 @@ class ProteinMPNNDesigner:
         repo_dir: str | Path,
         ca_only: bool = True,
         python_exe: str | None = None,
+        model_name: str = "v_48_020",
+        weights_dir: str | Path | None = None,
     ) -> None:
         self.repo_dir = Path(repo_dir)
         self.run_py = self.repo_dir / "protein_mpnn_run.py"
         self.ca_only = ca_only
         self.python_exe = python_exe or "python"
+        self.model_name = model_name
+        # Pass the weights folder explicitly. ProteinMPNN's own auto-detection
+        # uses rfind("/"), which is broken on Windows (backslash paths) and
+        # produces a malformed weights path; supplying it directly avoids that.
+        if weights_dir is not None:
+            self.weights_dir = Path(weights_dir)
+        else:
+            sub = "ca_model_weights" if ca_only else "vanilla_model_weights"
+            self.weights_dir = self.repo_dir / sub
 
     def _build_command(
         self,
@@ -93,6 +104,10 @@ class ProteinMPNNDesigner:
             str(pdb_path),
             "--out_folder",
             str(out_dir),
+            "--path_to_model_weights",
+            str(self.weights_dir),
+            "--model_name",
+            self.model_name,
             "--num_seq_per_target",
             str(n_seqs),
             "--sampling_temp",
@@ -131,7 +146,13 @@ class ProteinMPNNDesigner:
                 pdb_path, tmp, n_seqs, temperature, seed, batch_size
             )
             LOGGER.info("Running ProteinMPNN: %s", " ".join(cmd))
-            subprocess.run(cmd, check=True, capture_output=True, text=True)
+            try:
+                subprocess.run(cmd, check=True, capture_output=True, text=True)
+            except subprocess.CalledProcessError as exc:
+                raise RuntimeError(
+                    f"ProteinMPNN failed (exit {exc.returncode}).\n"
+                    f"--- stderr ---\n{exc.stderr}\n--- stdout ---\n{exc.stdout}"
+                ) from exc
             fasta = Path(tmp) / "seqs" / f"{pdb_path.stem}.fa"
             records = parse_mpnn_fasta(fasta.read_text())
 

@@ -83,6 +83,16 @@ def test_build_command_has_ca_only_and_core_flags():
     assert "--ca_only" in cmd
     assert "--num_seq_per_target" in cmd and "4" in cmd
     assert "--pdb_path" in cmd and "bb.pdb" in cmd
+    # Weights folder passed explicitly (works around ProteinMPNN's Windows bug).
+    assert "--path_to_model_weights" in cmd
+    assert any("ca_model_weights" in part for part in cmd)
+
+
+def test_weights_dir_defaults_to_ca_folder():
+    d = ProteinMPNNDesigner(repo_dir="/repo", ca_only=True)
+    assert d.weights_dir.name == "ca_model_weights"
+    d2 = ProteinMPNNDesigner(repo_dir="/repo", ca_only=False)
+    assert d2.weights_dir.name == "vanilla_model_weights"
 
 
 def test_designer_raises_helpful_error_when_repo_missing(tmp_path):

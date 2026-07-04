@@ -71,6 +71,26 @@ def test_hypervolume_monotonic_when_adding_better_point():
     assert hypervolume(more, ref) >= hypervolume(base, ref)
 
 
+def test_hypervolume_3d_dominated_point_not_double_counted():
+    # (1,1,1) is dominated by (2,2,2) (maximization) -> HV must be unchanged.
+    ref = [0.0, 0.0, 0.0]
+    a = hypervolume([[2.0, 2.0, 2.0]], ref)
+    b = hypervolume([[2.0, 2.0, 2.0], [1.0, 1.0, 1.0]], ref)
+    assert abs(a - b) < 1e-9 and abs(a - 8.0) < 1e-9
+
+
+def test_hypervolume_3d_monotonic_under_incremental_addition():
+    # Regression: a slice with a 2D-dominated projection must not shrink HV.
+    ref = [0.0, 0.0, 0.0]
+    pts = [[5, 5, 1], [1, 1, 5], [2, 2, 2], [4, 1, 1], [1, 4, 3], [3, 3, 3]]
+    prev, cur = 0.0, []
+    for p in pts:
+        cur.append([float(v) for v in p])
+        hv = hypervolume(cur, ref)
+        assert hv >= prev - 1e-9, f"HV decreased at {p}: {hv} < {prev}"
+        prev = hv
+
+
 # --- NSGA-II -----------------------------------------------------------------
 
 

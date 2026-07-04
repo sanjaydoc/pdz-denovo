@@ -101,14 +101,21 @@ def crowding_distance(scores, indices=None) -> dict:
 
 
 def _hv2d_min(points, ref) -> float:
-    """2D hypervolume for minimization; ``ref`` is the upper-bound (worst) point."""
-    pts = sorted(points, key=lambda p: p[0])  # x ascending -> y descending (nondom)
+    """2D hypervolume for minimization; ``ref`` is the upper-bound (worst) point.
+
+    Filters to points that beat the reference and reduces to the 2D
+    non-dominated staircase first, so dominated projections cannot subtract
+    area. (This matters when the function is called on the projected active set
+    of a 3D sweep, which is not guaranteed non-dominated.)
+    """
+    rx, ry = ref[0], ref[1]
+    pts = sorted((p for p in points if p[0] < rx and p[1] < ry), key=lambda p: (p[0], p[1]))
     hv = 0.0
-    last_y = ref[1]
+    last_y = ry
     for x, y in pts:
-        if x >= ref[0] or y >= ref[1]:
-            continue
-        hv += (ref[0] - x) * (last_y - y)
+        if y >= last_y:
+            continue  # dominated in 2D by an already-counted point
+        hv += (rx - x) * (last_y - y)
         last_y = y
     return hv
 

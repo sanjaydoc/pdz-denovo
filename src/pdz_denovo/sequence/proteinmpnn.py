@@ -75,7 +75,7 @@ class ProteinMPNNDesigner:
         model_name: str = "v_48_020",
         weights_dir: str | Path | None = None,
     ) -> None:
-        self.repo_dir = Path(repo_dir)
+        self.repo_dir = Path(repo_dir).resolve()
         self.run_py = self.repo_dir / "protein_mpnn_run.py"
         self.ca_only = ca_only
         # Default to the *current* interpreter so ProteinMPNN runs in the same
@@ -87,7 +87,7 @@ class ProteinMPNNDesigner:
         # uses rfind("/"), which is broken on Windows (backslash paths) and
         # produces a malformed weights path; supplying it directly avoids that.
         if weights_dir is not None:
-            self.weights_dir = Path(weights_dir)
+            self.weights_dir = Path(weights_dir).resolve()
         else:
             sub = "ca_model_weights" if ca_only else "vanilla_model_weights"
             self.weights_dir = self.repo_dir / sub
@@ -104,10 +104,14 @@ class ProteinMPNNDesigner:
         cmd = [
             self.python_exe,
             str(self.run_py),
+            # Bare filename only: ProteinMPNN derives the output name by splitting
+            # on "/", which mangles Windows paths. We run with cwd = the PDB's
+            # folder (see design()), so the basename resolves correctly and the
+            # output name stays clean.
             "--pdb_path",
-            str(pdb_path),
+            Path(pdb_path).name,
             "--out_folder",
-            str(out_dir),
+            str(Path(out_dir).resolve()),
             "--path_to_model_weights",
             str(self.weights_dir),
             "--model_name",
@@ -139,25 +143,30 @@ class ProteinMPNNDesigner:
 
         Returns a list of :class:`Candidate` (origin ``"proteinmpnn"``).
         """
-        pdb_path = Path(pdb_path)
+        pdb_path = Path(pdb_path).resolve()
         if not self.run_py.exists():
             raise FileNotFoundError(
                 f"ProteinMPNN not found at {self.run_py}. Clone it first:\n"
                 f"    python scripts/download_proteinmpnn.py"
             )
         with tempfile.TemporaryDirectory() as tmp:
+            tmp_abs = Path(tmp).resolve()
             cmd = self._build_command(
-                pdb_path, tmp, n_seqs, temperature, seed, batch_size
+                pdb_path, tmp_abs, n_seqs, temperature, seed, batch_size
             )
             LOGGER.info("Running ProteinMPNN: %s", " ".join(cmd))
             try:
-                subprocess.run(cmd, check=True, capture_output=True, text=True)
+                # cwd = PDB folder so the bare --pdb_path basename resolves.
+                subprocess.run(
+                    cmd, check=True, capture_output=True, text=True,
+                    cwd=str(pdb_path.parent),
+                )
             except subprocess.CalledProcessError as exc:
                 raise RuntimeError(
                     f"ProteinMPNN failed (exit {exc.returncode}).\n"
                     f"--- stderr ---\n{exc.stderr}\n--- stdout ---\n{exc.stdout}"
                 ) from exc
-            fasta = Path(tmp) / "seqs" / f"{pdb_path.stem}.fa"
+            fasta = tmp_abs / "seqs" / f"{pdb_path.stem}.fa"
             records = parse_mpnn_fasta(fasta.read_text())
 
         return _records_to_candidates(

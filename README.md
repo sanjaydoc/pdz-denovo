@@ -65,22 +65,53 @@ checkpointing, CPU fallbacks, and a lightweight default stability oracle.
 
 ## Quickstart
 
+### 1. One-time setup
+
+**Windows (PowerShell):**
 ```powershell
-# 1. Create the environment (one-time)
-scripts\setup_env.ps1
-
-# 2. Activate it
-.\.venv\Scripts\Activate.ps1
-
-# 3. Download the PDZ target structure + seed data
-python scripts\download_data.py
-
-# 4. Run a single DBTL cycle (once implemented)
-python scripts\run_cycle.py
-
-# 5. Launch the dashboard
-streamlit run app\streamlit_app.py
+scripts\setup_env.ps1                 # creates .venv, installs CUDA torch + requirements
+pip install "setuptools<81"           # MLflow 2.9 needs pkg_resources (removed in setuptools>=81)
+python scripts\download_proteinmpnn.py
 ```
+
+**Linux / macOS (bash):**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip "setuptools<81" wheel
+# GPU (Linux + NVIDIA):
+pip install torch --index-url https://download.pytorch.org/whl/cu121
+# CPU only / macOS (Apple Silicon uses MPS/CPU):
+# pip install torch
+pip install -r requirements.txt
+pip install -e .
+python scripts/download_proteinmpnn.py
+```
+
+### 2. Activate the environment (every new terminal)
+
+| OS | Command |
+|----|---------|
+| Windows (PowerShell) | `.\.venv\Scripts\Activate.ps1` |
+| Windows (cmd) | `.venv\Scripts\activate.bat` |
+| Linux / macOS | `source .venv/bin/activate` |
+
+### 3. Run the pipeline
+
+The Python commands are identical across platforms (forward slashes work everywhere):
+
+```bash
+python scripts/verify_torch.py                                              # check GPU
+python scripts/download_training_data.py                                    # training backbones
+python scripts/train_generator.py --data-dir data/processed/train --length 64 --epochs 150
+python scripts/validate_designs.py --n-backbones 4 --n-seqs 6               # scRMSD / pLDDT
+python scripts/run_cycle.py --n-cycles 5 --library-size 32 --n-seed 16      # DBTL loop
+python scripts/benchmark_optimizers.py --n-cycles 6                         # NSGA-II vs qNEHVI vs random
+streamlit run app/streamlit_app.py                                          # dashboard
+```
+
+> On Windows you can use backslashes (`scripts\run_cycle.py`) too; see
+> [`How-To-Run-Commands.txt`](How-To-Run-Commands.txt) for a Windows/cmd reference.
 
 ## Project layout
 
